@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FINEX — AI Agent</title>
+  <style>
+    :root {
+      --bg-dark: #0F172A;
+      --bg-card: #1E293B;
+      --bg-input: #0B1120;
+      --emerald: #10B981;
+      --emerald-dark: #059669;
+      --gold: #F59E0B;
+      --danger: #EF4444;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(160deg, var(--bg-dark) 0%, #090E1A 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: var(--emerald);
+      font-size: 18px;
+    }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.15s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--emerald);
+      color: #06281E;
+    }
+
+    .btn-secondary {
+      background: #273549;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+
+    .btn-voice {
+      background: linear-gradient(135deg, var(--gold), #D97706);
+      color: #1A1102;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.16);
+      color: #FCA5A5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .income-val { color: var(--emerald); }
+    .expense-val { color: #F87171; }
+    .balance-val { color: var(--gold); }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .agent-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .agent-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    input, select {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 12px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      width: 100%;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--emerald);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .full-span {
+      grid-column: 1 / -1;
+    }
+
+    .status-msg {
+      font-size: 13px;
+      color: var(--emerald);
+      min-height: 18px;
+    }
+
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+
+    .tx-item {
+      background: var(--bg-input);
+      border: 1px solid #243247;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tx-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .tx-title {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .tx-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .tx-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tx-amt {
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .settings-panel {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .settings-panel.open {
+      display: flex;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    @media (max-width: 520px) {
+      .stats-grid, .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Top Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-badge">FX</div>
+        <div>
+          <div class="brand-title">FINEX</div>
+          <div class="brand-sub">AI AGENT</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary" id="toggleSettingsBtn">Settings</button>
+        <button class="btn btn-secondary" id="exportCsvBtn">CSV</button>
+      </div>
+    </header>
+
+    <!-- Optional Cloud Webhook / Workspace Settings -->
+    <section class="card settings-panel" id="settingsPanel">
+      <div class="card-title">Workspace & Sync Settings</div>
+      <div>
+        <label class="hint">Workspace Name</label>
+        <input type="text" id="workspaceInput" placeholder="e.g. Personal Vault" />
+      </div>
+      <div>
+        <label class="hint">Currency Symbol</label>
+        <input type="text" id="currencyInput" placeholder="e.g. AED, ₹, $" maxlength="6" />
+      </div>
+      <div>
+        <label class="hint">Optional Webhook / Apps Script URL (POST JSON)</label>
+        <input type="url" id="webhookInput" placeholder="https://script.google.com/macros/s/.../exec" />
+      </div>
+      <div class="agent-row">
+        <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+        <span class="hint" id="settingsSavedNote"></span>
+      </div>
+    </section>
+
+    <!-- Summary Cards -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Income</div>
+        <div class="stat-value income-val" id="totalIncome">0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Expense</div>
+        <div class="stat-value expense-val" id="totalExpense">0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Net Balance</div>
+        <div class="stat-value balance-val" id="netBalance">0.00</div>
+      </div>
+    </section>
+
+    <!-- AI Voice & Natural Command Bar -->
+    <section class="card agent-box">
+      <div class="card-title">
+        <span>Smart AI Command</span>
+        <select id="voiceLang" style="width:auto; padding:6px 10px; font-size:12px;">
+          <option value="ml-IN">Malayalam (ml-IN)</option>
+          <option value="en-US">English (en-US)</option>
+          <option value="en-IN">English India (en-IN)</option>
+        </select>
+      </div>
+      <div class="agent-row">
+        <input
+          type="text"
+          id="aiCommandInput"
+          placeholder='Try: "food 45", "salary 5000 income", or speak in Malayalam/English...'
+          style="flex:1; min-width:200px;"
+        />
+        <button class="btn btn-voice" id="voiceBtn" type="button">🎤 Voice</button>
+        <button class="btn btn-primary" id="runCommandBtn" type="button">Run</button>
+      </div>
+      <div class="status-msg" id="statusMsg"></div>
+    </section>
+
+    <!-- Manual Entry Form -->
+    <section class="card">
+      <div class="card-title">Quick Entry</div>
+      <form id="entryForm" class="form-grid">
+        <div>
+          <select id="typeInput">
+            <option value="expense">Expense (-)</option>
+            <option value="income">Income (+)</option>
+          </select>
+        </div>
+        <div>
+          <input type="number" step="0.01" min="0.01" id="amountInput" placeholder="Amount" required />
+        </div>
+        <div>
+          <input type="text" id="categoryInput" placeholder="Category (Food, Travel, Bills...)" required />
+        </div>
+        <div>
+          <input type="text" id="noteInput" placeholder="Note (optional)" />
+        </div>
+        <div class="full-span">
+          <button class="btn btn-primary" type="submit" style="width:100%;">Add Entry</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Transactions History -->
+    <section class="card">
+      <div class="card-title">
+        <span>Recent Activity</span>
+        <span class="hint" id="entryCount">0 items</span>
+      </div>
+      <div class="tx-list" id="txList"></div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "finex_ai_agent_v1";
+
+    const defaultState = {
+      workspace: "FINEX Workspace",
+      currency: "AED",
+      webhookUrl: "",
+      entries: []
+    };
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { ...defaultState };
+        const parsed = JSON.parse(raw);
+        return {
+          workspace: parsed.workspace || defaultState.workspace,
+          currency: parsed.currency || defaultState.currency,
+          webhookUrl: parsed.webhookUrl || "",
+          entries: Array.isArray(parsed.entries) ? parsed.entries : []
+        };
+      } catch {
+        return { ...defaultState };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function formatMoney(num) {
+      const val = Number(num || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      return `${state.currency} ${val}`;
+    }
+
+    function setStatus(msg, isError = false) {
+      const el = document.getElementById("statusMsg");
+      el.style.color = isError ? "#F87171" : "#10B981";
+      el.textContent = msg;
+    }
+
+    async function pushWebhook(entry) {
+      if (!state.webhookUrl) return;
+      try {
+        await fetch(state.webhookUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            workspace: state.workspace,
+            currency: state.currency,
+            entry
+          })
+        });
+      } catch (err) {
+        console.warn("Webhook sync skipped:", err);
+      }
+    }
+
+    function addEntry(type, amount, category, note = "") {
+      const numericAmount = parseFloat(amount);
+      if (!numericAmount || numericAmount <= 0) {
+        setStatus("Please enter a valid positive amount.", true);
+        return false;
+      }
+
+      const newEntry = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        type: type === "income" ? "income" : "expense",
+        amount: numericAmount,
+        category: (category || "General").trim(),
+        note: (note || "").trim(),
+        createdAt: new Date().toISOString()
+      };
+
+      state.entries.unshift(newEntry);
+      saveState();
+      renderAll();
+      pushWebhook(newEntry);
+      setStatus(`Added ${newEntry.type}: ${formatMoney(newEntry.amount)} (${newEntry.category})`);
+      return true;
+    }
+
+    function deleteEntry(id) {
+      state.entries = state.entries.filter((item) => item.id !== id);
+      saveState();
+      renderAll();
+      setStatus("Entry removed.");
+    }
+
+    function parseSmartCommand(text) {
+      const clean = text.trim();
+      if (!clean) return null;
+
+      const numMatch = clean.match(/(\d+(?:\.\d{1,2})?)/);
+      if (!numMatch) return null;
+
+      const amount = parseFloat(numMatch[1]);
+      const lower = clean.toLowerCase();
+
+      const isIncome =
+        /\b(income|salary|bonus|deposit|credit|received|earn|വരവ്|ശമ്പളം|കിട്ടി)\b/i.test(lower);
+
+      const withoutNum = clean
+        .replace(numMatch[0], "")
+        .replace(/\b(income|expense|salary|bonus|deposit|credit|received|aed|inr|rs|usd|രൂപ|ദർഹം)\b/gi, "")
+        .trim();
+
+      const category = withoutNum || (isIncome ? "Income" : "General");
+      return {
+        type: isIncome ? "income" : "expense",
+        amount,
+        category,
+        note: clean
+      };
+    }
+
+    function renderStats() {
+      let income = 0;
+      let expense = 0;
+      for (const item of state.entries) {
+        if (item.type === "income") income += Number(item.amount || 0);
+        else expense += Number(item.amount || 0);
+      }
+      document.getElementById("totalIncome").textContent = formatMoney(income);
+      document.getElementById("totalExpense").textContent = formatMoney(expense);
+      document.getElementById("netBalance").textContent = formatMoney(income - expense);
+    }
+
+    function renderTransactions() {
+      const listEl = document.getElementById("txList");
+      const countEl = document.getElementById("entryCount");
+      countEl.textContent = `${state.entries.length} ${state.entries.length === 1 ? "item" : "items"}`;
+
+      if (!state.entries.length) {
+        listEl.innerHTML = `<div class="hint" style="text-align:center; padding:16px;">No entries yet. Use Smart AI Command or Quick Entry above.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = state.entries
+        .map((item) => {
+          const sign = item.type === "income" ? "+" : "-";
+          const color = item.type === "income" ? "#10B981" : "#F87171";
+          const dateStr = new Date(item.createdAt).toLocaleString([], {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+          return `
+            <div class="tx-item">
+              <div class="tx-main">
+                <div class="tx-title">${escapeHtml(item.category)}</div>
+                <div class="tx-meta">${escapeHtml(item.note || item.type)} • ${dateStr}</div>
+              </div>
+              <div class="tx-right">
+                <div class="tx-amt" style="color:${color};">${sign}${formatMoney(item.amount)}</div>
+                <button class="btn btn-danger" onclick="deleteEntry('${item.id}')">✕</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function renderSettingsInputs() {
+      document.getElementById("workspaceInput").value = state.workspace;
+      document.getElementById("currencyInput").value = state.currency;
+      document.getElementById("webhookInput").value = state.webhookUrl;
+    }
+
+    function renderAll() {
+      renderStats();
+      renderTransactions();
+      renderSettingsInputs();
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function exportCsv() {
+      const headers = ["ID", "Type", "Amount", "Currency", "Category", "Note", "CreatedAt"];
+      const rows = state.entries.map((e) => [
+        e.id,
+        e.type,
+        e.amount,
+        state.currency,
+        `"${String(e.category).replace(/"/g, '""')}"`,
+        `"${String(e.note || "").replace(/"/g, '""')}"`,
+        e.createdAt
+      ]);
+      const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "finex-activity.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Event Listeners
+    document.getElementById("entryForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const type = document.getElementById("typeInput").value;
+      const amount = document.getElementById("amountInput").value;
+      const category = document.getElementById("categoryInput").value;
+      const note = document.getElementById("noteInput").value;
+      if (addEntry(type, amount, category, note)) {
+        document.getElementById("amountInput").value = "";
+        document.getElementById("categoryInput").value = "";
+        document.getElementById("noteInput").value = "";
+      }
+    });
+
+    document.getElementById("runCommandBtn").addEventListener("click", () => {
+      const input = document.getElementById("aiCommandInput");
+      const parsed = parseSmartCommand(input.value);
+      if (!parsed) {
+        setStatus('Could not detect an amount. Example: "lunch 25" or "salary 3000 income".', true);
+        return;
+      }
+      if (addEntry(parsed.type, parsed.amount, parsed.category, parsed.note)) {
+        input.value = "";
+      }
+    });
+
+    document.getElementById("aiCommandInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("runCommandBtn").click();
+      }
+    });
+
+    // Speech Recognition (Web Speech API)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const voiceBtn = document.getElementById("voiceBtn");
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      voiceBtn.addEventListener("click", () => {
+        recognition.lang = document.getElementById("voiceLang").value;
+        setStatus("Listening...");
+        recognition.start();
+      });
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("aiCommandInput").value = transcript;
+        const parsed = parseSmartCommand(transcript);
+        if (parsed) {
+          addEntry(parsed.type, parsed.amount, parsed.category, parsed.note);
+        } else {
+          setStatus(`Heard: "${transcript}" — add a number to log entry.`);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        setStatus(`Voice error: ${event.error}`, true);
+      };
+    } else {
+      voiceBtn.addEventListener("click", () => {
+        setStatus("Voice input not supported in this browser; type your command instead.", true);
+      });
+    }
+
+    document.getElementById("toggleSettingsBtn").addEventListener("click", () => {
+      document.getElementById("settingsPanel").classList.toggle("open");
+    });
+
+    document.getElementById("saveSettingsBtn").addEventListener("click", () => {
+      state.workspace = document.getElementById("workspaceInput").value.trim() || defaultState.workspace;
+      state.currency = document.getElementById("currencyInput").value.trim() || defaultState.currency;
+      state.webhookUrl = document.getElementById("webhookInput").value.trim();
+      saveState();
+      renderAll();
+      document.getElementById("settingsSavedNote").textContent = "Saved!";
+      setTimeout(() => {
+        document.getElementById("settingsSavedNote").textContent = "";
+      }, 2000);
+    });
+
+    document.getElementById("exportCsvBtn").addEventListener("click", exportCsv);
+
+    renderAll();
+  </script>
+</body>
+</html>
